@@ -3,6 +3,7 @@
 #import "ui/OFBHeaderView.h"
 #import "ui/OFBOutlineView.h"
 #import "ui/OFBPathInfoCell.h"
+#import "ui/OFBActionsView.h"
 #import "io/FSDataSource.h"
 #import "io/FSSCMDataSource.h"
 #import "io/FSItem.h"
@@ -39,6 +40,7 @@ OAK_DEBUG_VAR(FileBrowser_Controller);
 @property (nonatomic, readwrite)         NSView* view;
 @property (nonatomic)                    OFBHeaderView* headerView;
 @property (nonatomic)                    OFBOutlineView* outlineView;
+@property (nonatomic)                    OFBActionsView* actionsView;
 
 @property (nonatomic)                    FSOutlineViewDelegate* outlineViewDelegate;
 @property (nonatomic)                    NSUInteger dataSourceOptions;
@@ -141,9 +143,20 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 	_headerView.goForwardButton.target = self;
 	_headerView.goForwardButton.action = @selector(goForward:);
 
+	_actionsView = [[OFBActionsView alloc] initWithFrame:NSZeroRect];
+	_actionsView.createButton.action    = @selector(newDocumentInTab:);
+	_actionsView.reloadButton.target    = self;
+	_actionsView.reloadButton.action    = @selector(reload:);
+	_actionsView.searchButton.action    = @selector(orderFrontFindPanelForFileBrowser:);
+	_actionsView.favoritesButton.target = self;
+	_actionsView.favoritesButton.action = @selector(goToFavorites:);
+	_actionsView.scmButton.target       = self;
+	_actionsView.scmButton.action       = @selector(goToSCMDataSource:);
+
 	_view = [NSView new];
 	[_view addSubview:_headerView];
 	[_view addSubview:scrollView];
+	[_view addSubview:_actionsView];
 
 	NSCell* cell = [OFBPathInfoCell new];
 	cell.lineBreakMode = NSLineBreakByTruncatingMiddle;
@@ -162,13 +175,14 @@ static NSMutableSet* SymmetricDifference (NSMutableSet* aSet, NSMutableSet* anot
 		@"parent"  : _view,
 		@"header"  : _headerView,
 		@"browser" : scrollView,
+		@"actions" : _actionsView,
 	};
 
 	for(NSView* view in [views allValues])
 		[view setTranslatesAutoresizingMaskIntoConstraints:NO];
 
-	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[header(==browser)]|" options:0 metrics:nil views:views]];
-	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][browser]|"   options:0 metrics:nil views:views]];
+	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[browser(==header,==actions)]|" options:0 metrics:nil views:views]];
+	[_view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[header][browser][actions]|"    options:NSLayoutFormatAlignAllLeft metrics:nil views:views]];
 }
 
 - (void)setupViewWithState:(NSDictionary*)fileBrowserState
