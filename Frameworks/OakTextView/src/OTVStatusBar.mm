@@ -1,22 +1,61 @@
 #import "OTVStatusBar.h"
+#import <OakAppKit/OakAppKit.h>
 #import <OakAppKit/NSImage Additions.h>
+
+static NSTextField* OakCreateTextField (NSString* label)
+{
+	NSTextField* res = [[NSTextField alloc] initWithFrame:NSZeroRect];
+	[res setBordered:NO];
+	[res setEditable:NO];
+	[res setSelectable:NO];
+	[res setBezeled:NO];
+	[res setDrawsBackground:NO];
+	[res setFont:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]];
+	[res setStringValue:label];
+	return res;
+}
+
+static NSPopUpButton* OakCreatePopUpButton (NSString* initialItem = nil)
+{
+	NSPopUpButton* res = [NSPopUpButton new];
+	[[res cell] setBackgroundStyle:NSBackgroundStyleLight];
+	[res setBordered:NO];
+	[res setFont:[NSFont controlContentFontOfSize:[NSFont smallSystemFontSize]]];
+
+	if(initialItem)
+	{
+		NSMenu* menu = [NSMenu new];
+		[menu addItemWithTitle:initialItem action:@selector(nop:) keyEquivalent:@""];
+		res.menu = menu;
+	}
+
+	return res;
+}
+
+static NSButton* OakCreateImageButton (NSImage* image)
+{
+	NSButton* res = [NSButton new];
+
+	// [[res cell] setBackgroundStyle:NSBackgroundStyleRaised];
+	[res setButtonType:NSMomentaryChangeButton];
+	[res setBezelStyle:NSSmallSquareBezelStyle];
+	[res setBordered:NO];
+
+	[res setImage:image];
+	[res setImagePosition:NSImageOnly];
+
+	// [res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+	// [res setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationVertical];
+
+	return res;
+}
 
 @interface OTVStatusBar ()
 {
 	text::range_t caretPosition;
-	NSString* grammarName;
-	NSString* symbolName;
-	BOOL isMacroRecording;
-	BOOL softTabs;
-	int32_t tabSize;
-
-	id <OTVStatusBarDelegate> delegate;
-
-	NSImage* pulsedRecordingIndicator;
-	NSTimer* recordingTimer;
-	CGFloat recordingTime;
 }
 - (void)update;
+@property (nonatomic) CGFloat recordingTime;
 @property (nonatomic, retain) NSTimer* recordingTimer;
 @property (nonatomic, retain) NSImage* pulsedRecordingIndicator;
 @end
@@ -24,11 +63,72 @@
 const NSInteger BundleItemSelector = 1;
 
 @implementation OTVStatusBar
-@synthesize recordingTimer, pulsedRecordingIndicator, grammarName, symbolName, isMacroRecording, tabSize, softTabs;
-@synthesize delegate;
+- (id)initWithFrame:(NSRect)aRect
+{
+	if(self = [super initWithTopColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] bottomColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1] inactiveTopColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] inactiveBottomColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]])
+	{
+		NSTextField* lineLabel = OakCreateTextField(@"Line:");
+		NSTextField* selectionString = OakCreateTextField(@"1:1");
+		NSPopUpButton* grammarPopUp = OakCreatePopUpButton(@"Objective-C");
+		NSPopUpButton* bundleItemsPopUp = OakCreatePopUpButton(@"[GEAR]");
+		NSPopUpButton* tabSizePopUp = OakCreatePopUpButton(@"Tab Size: 3");
+		NSPopUpButton* symbolPopUp = OakCreatePopUpButton(@"- initWithFrame:");
+		NSButton* macroRecordingImage = OakCreateImageButton([NSImage imageNamed:@"RecordingMacro" inSameBundleAsClass:[self class]]);
+
+		bundleItemsPopUp.pullsDown = YES;
+		tabSizePopUp.pullsDown     = YES;
+
+		NSMenu* menu = [NSMenu new];
+		NSMenuItem* item = [NSMenuItem new];
+		item.title = @"";
+		item.image = [NSImage imageNamed:NSImageNameActionTemplate];
+		[menu addItem:item];
+		[menu addItemWithTitle:@"C" action:@selector(nop:) keyEquivalent:@""];
+		[menu addItemWithTitle:@"Objective-C" action:@selector(nop:) keyEquivalent:@""];
+		bundleItemsPopUp.menu = menu;
+
+		menu = [NSMenu new];
+		[menu addItemWithTitle:@"Tab Size: 3" action:@selector(nop:) keyEquivalent:@""];
+		[menu addItemWithTitle:@"3" action:@selector(nop:) keyEquivalent:@""];
+		[menu addItemWithTitle:@"4" action:@selector(nop:) keyEquivalent:@""];
+		tabSizePopUp.menu = menu;
+
+		// [symbolPopUp setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
+		[symbolPopUp setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+		NSDictionary* views = @{
+			@"topBorder" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
+			@"line"      : lineLabel,
+			@"selection" : selectionString,
+			@"grammar"   : grammarPopUp,
+			@"items"     : bundleItemsPopUp,
+			@"tabSize"   : tabSizePopUp,
+			@"symbol"    : symbolPopUp,
+			@"recording" : macroRecordingImage,
+		};
+
+		for(NSView* view in [views allValues])
+		{
+			[view setTranslatesAutoresizingMaskIntoConstraints:NO];
+			[self addSubview:view];
+		}
+
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[line]-[selection]-[grammar]-[items]-[tabSize]-[symbol]-[recording]-|" options:NSLayoutFormatAlignAllBaseline metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topBorder]|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topBorder]" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[line]-(4)-|" options:0 metrics:nil views:views]];
+	}
+	return self;
+}
+
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(NSViewNoInstrinsicMetric, 25);
+}
 
 - (void)update
 {
+#if 0
 	size_t line = caretPosition.min().line, column = caretPosition.min().column;
 
 	std::string const lineNumberText = "Line: " + text::pad(line+1, 4) + "\u2003" /* Em Space */ + "Column: " + text::pad(column+1, 3);
@@ -47,6 +147,7 @@ const NSInteger BundleItemSelector = 1;
 		sb::cell_t::info().size(15),
 	};
 	SetCells(self, cellList);
+#endif
 }
 
 - (void)updateMacroRecordingAnimation:(NSTimer*)aTimer
@@ -54,13 +155,13 @@ const NSInteger BundleItemSelector = 1;
 	NSImage* startImage = [NSImage imageNamed:@"RecordingMacro" inSameBundleAsClass:[self class]];
 	self.pulsedRecordingIndicator = [[[NSImage alloc] initWithSize:startImage.size] autorelease];
 
-	[pulsedRecordingIndicator lockFocus];
-	CGFloat fraction = oak::cap(0.00, 0.50 + 0.50 * sin(recordingTime), 1.0);
+	[_pulsedRecordingIndicator lockFocus];
+	CGFloat fraction = oak::cap(0.00, 0.50 + 0.50 * sin(_recordingTime), 1.0);
 	[startImage drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:fraction];
-	[pulsedRecordingIndicator unlockFocus];
+	[_pulsedRecordingIndicator unlockFocus];
 
 	[self update];
-	recordingTime += 0.075;
+	_recordingTime += 0.075;
 }
 
 // ==============
@@ -69,34 +170,34 @@ const NSInteger BundleItemSelector = 1;
 
 - (void)setGrammarName:(NSString*)newGrammarName
 {
-	[grammarName release];
-	grammarName = [newGrammarName copy];
+	[_grammarName release];
+	_grammarName = [newGrammarName copy];
 	[self update];
 }
 
 - (void)setSymbolName:(NSString*)newSymbolName
 {
-	[symbolName release];
-	symbolName = [newSymbolName copy];
+	[_symbolName release];
+	_symbolName = [newSymbolName copy];
 	[self update];
 }
 
 - (void)setRecordingTimer:(NSTimer*)aTimer
 {
-	if(aTimer != recordingTimer)
+	if(_recordingTimer != aTimer)
 	{
-		[recordingTimer invalidate];
-		[recordingTimer release];
-		recordingTimer = [aTimer retain];
+		[_recordingTimer invalidate];
+		[_recordingTimer release];
+		_recordingTimer = [aTimer retain];
 	}
 }
 
 - (void)setIsMacroRecording:(BOOL)flag
 {
-	isMacroRecording = flag;
-	if(isMacroRecording)
+	_isMacroRecording = flag;
+	if(_isMacroRecording)
 	{
-		recordingTime = 0;
+		_recordingTime = 0;
 		self.recordingTimer = [NSTimer scheduledTimerWithTimeInterval:0.02 target:self selector:@selector(updateMacroRecordingAnimation:) userInfo:nil repeats:YES];
 	}
 	else
@@ -115,13 +216,13 @@ const NSInteger BundleItemSelector = 1;
 
 - (void)setTabSize:(int32_t)size
 {
-	tabSize = size;
+	_tabSize = size;
 	[self update];
 }
 
 - (void)setSoftTabs:(BOOL)flag
 {
-	softTabs = flag;
+	_softTabs = flag;
 	[self update];
 }
 
