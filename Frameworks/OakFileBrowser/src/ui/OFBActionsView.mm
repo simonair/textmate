@@ -63,7 +63,6 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			@"search"    : self.searchButton,
 			@"favorites" : self.favoritesButton,
 			@"scm"       : self.scmButton,
-			@"topBorder" : OakCreateHorizontalLine([NSColor colorWithCalibratedWhite:0.500 alpha:1], [NSColor colorWithCalibratedWhite:0.750 alpha:1]),
 		};
 
 		for(NSView* view in [views allValues])
@@ -72,9 +71,8 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[topBorder]|"                                                                                  options:0 metrics:nil views:views]];
 		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[create(==21)]-(2)-[actions]-(>=8)-[reload(==21,==search,==favorites,==scm)]-[search]-[favorites]-[scm]-(24)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[topBorder(==1)]-(0)-[create(==21,==reload,==search,==favorites,==scm)]-(3)-|"                                                          options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(0)-[create(==21,==reload,==search,==favorites,==scm)]-(3)-|"                                                        options:0 metrics:nil views:views]];
 	}
 	return self;
 }
