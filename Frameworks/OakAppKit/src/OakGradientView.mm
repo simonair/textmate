@@ -11,7 +11,7 @@
 @implementation OakGradientView
 - (id)initWithTopColor:(NSColor*)topColor bottomColor:(NSColor*)bottomColor inactiveTopColor:(NSColor*)inactiveTopColor inactiveBottomColor:(NSColor*)inactiveBottomColor
 {
-	if(self = [self initWithFrame:NSZeroRect])
+	if(self = [super initWithFrame:NSZeroRect])
 	{
 		self.activeTopColor      = topColor;
 		self.activeBottomColor   = bottomColor;
