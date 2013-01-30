@@ -11,8 +11,8 @@ static NSButton* OakCreateImageButton (NSImage* image, NSSize imageSize = NSMake
 	[res setBezelStyle:NSSmallSquareBezelStyle];
 	[res setBordered:NO];
 
-	image = [image copy];
-	[image setSize:imageSize];
+	// image = [image copy];
+	// [image setSize:imageSize];
 	[res setImage:image];
 	[res setImagePosition:NSImageOnly];
 
@@ -27,6 +27,15 @@ static NSPopUpButton* OakCreatePopUpButton ()
 	NSPopUpButton* res = [NSPopUpButton new];
 	res.bordered  = NO;
 	res.pullsDown = YES;
+
+	NSMenuItem* item = [NSMenuItem new];
+	item.title = @"";
+	item.image = [NSImage imageNamed:NSImageNameActionTemplate];
+	[item.image setSize:NSMakeSize(12, 12)];
+
+	[[res cell] setUsesItemFromMenu:NO];
+	[[res cell] setMenuItem:item];
+
 	return res;
 }
 
@@ -49,16 +58,21 @@ static NSPopUpButton* OakCreatePopUpButton ()
 		self.scmButton.toolTip       = @"Show source control management status";
 
 		NSMenu* menu = [NSMenu new];
-		NSMenuItem* item = [NSMenuItem new];
-		item.title = @"";
-		item.image = [NSImage imageNamed:NSImageNameActionTemplate];
-		[menu addItem:item];
+		[menu addItemWithTitle:@"Unused" action:@selector(nop:) keyEquivalent:@""];
 		[menu addItemWithTitle:@"Create Folder" action:@selector(nop:) keyEquivalent:@""];
 		self.actionsPopUpButton.menu = menu;
 
+		NSView* wrappedActionsPopUpButton = [NSView new];
+		[wrappedActionsPopUpButton addSubview:self.actionsPopUpButton];
+		[self.actionsPopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[popup]|" options:0 metrics:nil views:@{ @"popup" : self.actionsPopUpButton }]];
+		[wrappedActionsPopUpButton addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[popup]|" options:0 metrics:nil views:@{ @"popup" : self.actionsPopUpButton }]];
+
 		NSDictionary* views = @{
 			@"create"    : self.createButton,
-			@"actions"   : self.actionsPopUpButton,
+			@"leftDivider" : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.551 alpha:1], [NSColor colorWithCalibratedWhite:0.801 alpha:1]),
+			@"leftShading" : OakCreateVerticalLine([NSColor colorWithCalibratedWhite:0.869 alpha:1], [NSColor colorWithCalibratedWhite:0.869 alpha:0]),
+			@"actions"   : wrappedActionsPopUpButton,
 			@"reload"    : self.reloadButton,
 			@"search"    : self.searchButton,
 			@"favorites" : self.favoritesButton,
@@ -71,9 +85,14 @@ static NSPopUpButton* OakCreatePopUpButton ()
 			[self addSubview:view];
 		}
 
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[create(==21)]-(2)-[actions]-(>=8)-[reload(==21,==search,==favorites,==scm)]-[search]-[favorites]-[scm]-(24)-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
-		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(0)-[create(==21,==reload,==search,==favorites,==scm)]-(3)-|"                                                        options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(24)-[create(==22)][leftDivider][leftShading][actions(==30)]-(>=8)-[reload(==22,==search,==favorites,==scm)][search][favorites][scm]-(24)-|" options:0 metrics:nil views:views]];
+		[self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[create(==leftDivider,==leftShading,==actions,==reload,==search,==favorites,==scm)]|"                                                         options:0 metrics:nil views:views]];
 	}
 	return self;
+}
+
+- (NSSize)intrinsicContentSize
+{
+	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
 }
 @end
