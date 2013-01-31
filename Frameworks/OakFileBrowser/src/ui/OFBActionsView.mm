@@ -42,7 +42,7 @@ static NSPopUpButton* OakCreatePopUpButton ()
 @implementation OFBActionsView
 - (id)initWithFrame:(NSRect)aRect
 {
-	if(self = [super initWithTopColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] bottomColor:[NSColor colorWithCalibratedWhite:0.760 alpha:1] inactiveTopColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1] inactiveBottomColor:[NSColor colorWithCalibratedWhite:0.915 alpha:1]])
+	if(self = [super initWithGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil] inactiveGradient:[[NSGradient alloc] initWithColorsAndLocations: [NSColor colorWithCalibratedWhite:1.000 alpha:0.68], 0.0, [NSColor colorWithCalibratedWhite:1.000 alpha:0.5], 0.0416, [NSColor colorWithCalibratedWhite:1.000 alpha:0.0], 1.0, nil]])
 	{
 		self.createButton       = OakCreateImageButton([NSImage imageNamed:NSImageNameAddTemplate]);
 		self.actionsPopUpButton = OakCreatePopUpButton();
@@ -94,5 +94,12 @@ static NSPopUpButton* OakCreatePopUpButton ()
 - (NSSize)intrinsicContentSize
 {
 	return NSMakeSize(NSViewNoInstrinsicMetric, 24);
+}
+
+- (void)drawRect:(NSRect)aRect
+{
+	[[NSColor windowBackgroundColor] set]; NSRectFill(aRect);
+	
+	[super drawRect:aRect];
 }
 @end
