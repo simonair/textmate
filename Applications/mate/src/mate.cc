@@ -8,6 +8,8 @@
 static double const AppVersion  = 2.4;
 static size_t const AppRevision = APP_REVISION;
 
+static const char WAIT_MATE_NAME[] = "mate";
+
 static char const* socket_path ()
 {
 	int uid = getuid();
@@ -152,8 +154,10 @@ static void usage (FILE* io)
 		" ls *.tex|%1$s|sh%4$s-w implied\n"
 		" %1$s -|cat -n   %4$s-w implied (read from stdin)\n"
 		"\n"
-		"An exception is made if the command is started as something which ends\nwith \"_wait\". "
+		"An exception is made if the command is started as either \"wate\"\n"
+		"or something that ends with \"_wait\". "
 		"So to have a command with --wait as default, you can\ncreate a symbolic link like this:\n"
+		" ln -s %1$s wate\n"
 		" ln -s %1$s %1$s_wait\n"
 		"\n", getprogname(), AppVersion, AppRevision, pad.c_str()
 	);
@@ -208,7 +212,8 @@ int main (int argc, char* argv[])
 	bool server        = false;
 	int should_wait    = -1, ch;
 
-	if(strlen(getprogname()) > 5 && strcmp(getprogname() + strlen(getprogname()) - 5, "_wait") == 0)
+	if( (strcmp(getprogname(), WAIT_MATE_NAME) != 0)
+		|| (strlen(getprogname()) > 5 && strcmp(getprogname() + strlen(getprogname()) - 5, "_wait") == 0) )
 		should_wait = true;
 
 	install_auth_tool();
