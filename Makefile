@@ -1,4 +1,4 @@
-builddir := build
+builddir = build
 
 zsh_latest_tag := `/bin/zsh -c 'print $${$${(A)=$$(git tag --list)}[(R)r[0-9]*]}'`
 
