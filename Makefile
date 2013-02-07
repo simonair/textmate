@@ -33,6 +33,12 @@ run_ninja:
 	ninja OakAppKit/headers
 	ninja
 
+mate: mkdir_build
+	ninja mate/clean
+	ninja mate
+	sudo cp $(builddir_path)/Applications/mate/mate /usr/local/bin/mate
+	sudo cp $(builddir_path)/Applications/mate/mate /usr/local/bin/wate
+
 clean:
 	ninja -t clean
 	rm -f build.ninja

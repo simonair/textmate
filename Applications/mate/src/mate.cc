@@ -212,7 +212,7 @@ int main (int argc, char* argv[])
 	bool server        = false;
 	int should_wait    = -1, ch;
 
-	if( (strcmp(getprogname(), WAIT_MATE_NAME) != 0)
+	if( (strcmp(getprogname(), WAIT_MATE_NAME) == 0)
 		|| (strlen(getprogname()) > 5 && strcmp(getprogname() + strlen(getprogname()) - 5, "_wait") == 0) )
 		should_wait = true;
 
