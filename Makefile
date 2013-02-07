@@ -1,4 +1,4 @@
-builddir = build
+builddir := build
 
 zsh_latest_tag := `/bin/zsh -c 'print $${$${(A)=$$(git tag --list)}[(R)r[0-9]*]}'`
 
@@ -30,6 +30,7 @@ configure_ninja: configure
 	builddir=$(builddir_path) /bin/sh configure
 	
 run_ninja:
+	ninja OakAppKit/headers
 	ninja
 
 clean:
