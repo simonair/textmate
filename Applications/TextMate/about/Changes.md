@@ -1,5 +1,32 @@
 # Changes
 
+## 2013-02-06 (r9371)
+
+* Performing file operations in the file browser now instantly reload rather than wait for fs-events. This not only give a better experience (instant feedback) but also makes the file browser update properly when using file systems that doesn’t support fs-events.
+* It’s (again) possible to make renames that only change case (on case-insensitive file systems).
+* The text view scroll bars now auto-hide when the content fits the viewport (for users who have opted to have them always visible).
+* Stability improvements.
+
+## 2013-02-05 (r9367)
+
+* When re-activating TextMate, the file browser will reload modified folders (based on stat’ing them and looking at the modification date). This is to support file systems which do not support fs-events.
+* Fix high CPU load when opening documents from outside the window’s project folder.
+* Fix missing items when collapsing and then expanding in file browser.
+* Use proper cursor image for resizing the command output view when it’s placed to the right of text (arrow left/right instead of up/down).
+
+## 2013-02-05 (r9363)
+
+* Fix crash introduced in last build. For the records, if you update to an unstable nightly build you can switch back to “Normal Releases” in _Preferences → Software Update_. When you then do _Check Now_ it’ll allow you to downgrade. Also, if a build gets pulled again, as was the case with r9361, staying on nightly builds also offer the downgrade option when you _Check Now_ — I may make it automatically downgrade in the future, when builds are pulled, seeing how many users prefer to use the nightly builds.
+
+## 2013-02-04 (r9361)
+
+* Files missing on disk but tracked by your version control system (with status as deleted) will now show in the file browser (with appropriate badge).
+* Improve performance relating to disk access. If you had SCM badges disabled I encourage you to enable them and speak up if there are still performance issues. Additionally TextMate should also perform better on (high-latency) network file systems.
+* The default save folder now use parent of selected file in the file browser (if any).
+* Use the custom (grid) icon for `.less` files. *[Bob Rockefeller]*
+* Fix wrong color used in red file labels. *[michael starke]*
+* Fix wrong behavior when selecting to end of line (problem introduced in last build).
+
 ## 2013-01-30 (r9359)
 
 * A (square) column selection is now broken into multiple carets (discontinuous selections) when selecting to begin/end of typing pairs (⌃⇧↑/⌃⇧↓) or to end of line/paragraph. Previously only left/right movement or “unit selection” would show this behavior.

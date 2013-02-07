@@ -92,6 +92,7 @@ private:
 		textScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
 		textScrollView.hasVerticalScroller   = YES;
 		textScrollView.hasHorizontalScroller = YES;
+		textScrollView.autohidesScrollers    = YES;
 		textScrollView.borderType            = NSNoBorder;
 		textScrollView.documentView          = textView;
 		[self addSubview:textScrollView];
@@ -368,11 +369,6 @@ private:
 
 		[gutterView setNeedsDisplay:YES];
 	}
-}
-
-- (BOOL)isOpaque
-{
-	return YES;
 }
 
 - (IBAction)toggleLineNumbers:(id)sender
