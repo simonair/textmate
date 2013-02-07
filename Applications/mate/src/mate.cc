@@ -8,7 +8,7 @@
 static double const AppVersion  = 2.4;
 static size_t const AppRevision = APP_REVISION;
 
-static const char WAIT_MATE_NAME[] = "mate";
+static const char WAIT_MATE_NAME[] = "wate";
 
 static char const* socket_path ()
 {
